@@ -44,6 +44,7 @@ def run_agent_tests():
 
     # 2. DiseasePredictionAgent Test
     print("\n[TEST 2] DiseasePredictionAgent...")
+    d_res = {}
     t0 = time.time()
     try:
         dpa = DiseasePredictionAgent()

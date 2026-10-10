@@ -1,7 +1,7 @@
 {
   "SymptomAgent": {
     "status": "PASS",
-    "time_seconds": 0.0002,
+    "time_seconds": 0.0005,
     "extracted_symptoms": [
       "cough",
       "fever",
@@ -35,7 +35,7 @@
   },
   "ReportSummaryAgent": {
     "status": "PASS",
-    "time_seconds": 0.012,
+    "time_seconds": 0.0129,
     "findings_count": 2,
     "abnormal_values_count": 1,
     "abnormal_items": [

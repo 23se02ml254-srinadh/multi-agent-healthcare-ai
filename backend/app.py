@@ -36,7 +36,7 @@ if not app.config.get('SQLALCHEMY_DATABASE_URI'):
 print(f"[OK] Database URI: {app.config['SQLALCHEMY_DATABASE_URI']}")
 
 # Initialize extensions
-CORS(app, origins=app.config.get('CORS_ORIGINS', ['*']), supports_credentials=True)
+CORS(app, origins=app.config.get('CORS_ORIGINS', ['*']), supports_credentials=True)  # type: ignore
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=7)
 app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=30)
 jwt = JWTManager(app)
@@ -216,15 +216,21 @@ def google_auth():
         except Exception as e:
             logger.error(f"Failed to exchange auth code with Google: {e}")
 
-    if not google_user_info or not google_user_info.get('email'):
+    if not google_user_info:
         return jsonify({'error': 'Invalid or unverified Google account information'}), 401
 
-    email = google_user_info['email'].strip().lower()
-    sub = google_user_info.get('sub')
-    picture = google_user_info.get('picture')
-    first_name = google_user_info.get('first_name') or ''
-    last_name = google_user_info.get('last_name') or ''
-    name = google_user_info.get('name') or ''
+    raw_email = google_user_info.get('email')
+    if not isinstance(raw_email, str) or not raw_email.strip():
+        return jsonify({'error': 'Invalid or unverified Google account information'}), 401
+
+    email = raw_email.strip().lower()
+    sub_val = google_user_info.get('sub')
+    sub = str(sub_val) if sub_val is not None else None
+    pic_val = google_user_info.get('picture')
+    picture = str(pic_val) if pic_val is not None else None
+    first_name = str(google_user_info.get('first_name') or '')
+    last_name = str(google_user_info.get('last_name') or '')
+    name = str(google_user_info.get('name') or '')
 
     if not first_name and name:
         parts = name.split(' ')
@@ -243,10 +249,10 @@ def google_auth():
             # Update Google details if not already present
             changed = False
             if hasattr(user, 'google_id') and not user.google_id and sub:
-                user.google_id = sub
+                setattr(user, 'google_id', sub)
                 changed = True
             if hasattr(user, 'avatar_url') and not user.avatar_url and picture:
-                user.avatar_url = picture
+                setattr(user, 'avatar_url', picture)
                 changed = True
             if not user.first_name and first_name:
                 user.first_name = first_name
@@ -282,14 +288,11 @@ def google_auth():
                 password_hash=random_hash,
                 first_name=first_name,
                 last_name=last_name,
+                google_id=sub,
+                avatar_url=picture,
+                auth_provider='google',
                 is_active=True
             )
-            if hasattr(user, 'google_id'):
-                user.google_id = sub
-            if hasattr(user, 'avatar_url'):
-                user.avatar_url = picture
-            if hasattr(user, 'auth_provider'):
-                user.auth_provider = 'google'
 
             db.session.add(user)
             db.session.commit()
@@ -388,15 +391,21 @@ def google_oauth_callback():
             if uinfo.status_code == 200:
                 google_user_info = uinfo.json()
 
-        if not google_user_info or not google_user_info.get('email'):
+        if not google_user_info:
             return redirect(f"{login_fallback}?error=invalid_google_account")
 
-        email = google_user_info['email'].strip().lower()
-        sub = google_user_info.get('sub')
-        picture = google_user_info.get('picture')
-        first_name = google_user_info.get('given_name', '')
-        last_name = google_user_info.get('family_name', '')
-        name = google_user_info.get('name', '')
+        raw_email = google_user_info.get('email')
+        if not isinstance(raw_email, str) or not raw_email.strip():
+            return redirect(f"{login_fallback}?error=invalid_google_account")
+
+        email = raw_email.strip().lower()
+        sub_val = google_user_info.get('sub')
+        sub = str(sub_val) if sub_val is not None else None
+        pic_val = google_user_info.get('picture')
+        picture = str(pic_val) if pic_val is not None else None
+        first_name = str(google_user_info.get('given_name') or '')
+        last_name = str(google_user_info.get('family_name') or '')
+        name = str(google_user_info.get('name') or '')
 
         if not first_name and name:
             parts = name.split(' ')
@@ -409,10 +418,10 @@ def google_oauth_callback():
                 return redirect(f"{login_fallback}?error=account_deactivated")
             changed = False
             if hasattr(user, 'google_id') and not user.google_id and sub:
-                user.google_id = sub
+                setattr(user, 'google_id', sub)
                 changed = True
             if hasattr(user, 'avatar_url') and not user.avatar_url and picture:
-                user.avatar_url = picture
+                setattr(user, 'avatar_url', picture)
                 changed = True
             if not user.first_name and first_name:
                 user.first_name = first_name
@@ -438,14 +447,11 @@ def google_oauth_callback():
                 password_hash=random_hash,
                 first_name=first_name,
                 last_name=last_name,
+                google_id=sub,
+                avatar_url=picture,
+                auth_provider='google',
                 is_active=True
             )
-            if hasattr(user, 'google_id'):
-                user.google_id = sub
-            if hasattr(user, 'avatar_url'):
-                user.avatar_url = picture
-            if hasattr(user, 'auth_provider'):
-                user.auth_provider = 'google'
 
             db.session.add(user)
             db.session.commit()
@@ -604,8 +610,8 @@ def get_chat_history():
     session_id = request.args.get('session_id')
     
     query = ChatMessage.query.filter_by(user_id=user_id)
-    if session_id and str(session_id).strip().lower() not in ['none', 'null', 'undefined', '']:
-        query = query.filter_by(session_id=str(session_id).strip())
+    if session_id and session_id.strip().lower() not in ['none', 'null', 'undefined', '']:
+        query = query.filter_by(session_id=session_id.strip())
     
     messages = query.order_by(ChatMessage.created_at.asc()).all()
     return jsonify([msg.to_dict() for msg in messages]), 200
@@ -731,12 +737,12 @@ def upload_report():
     raw_session_id = request.form.get('session_id')
     user_message = request.form.get('message', '').strip()
     
-    if not raw_session_id or str(raw_session_id).strip().lower() in ['none', 'null', 'undefined', '']:
+    if not raw_session_id or raw_session_id.strip().lower() in ['none', 'null', 'undefined', '']:
         session_id = str(uuid.uuid4())
     else:
-        session_id = str(raw_session_id).strip()
+        session_id = raw_session_id.strip()
     
-    if file.filename == '':
+    if not file or not file.filename:
         return jsonify({'error': 'No selected file'}), 400
         
     try:

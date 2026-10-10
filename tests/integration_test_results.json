@@ -2,17 +2,17 @@
   {
     "test": "PostgreSQL Connectivity & Tables",
     "status": "PASS",
-    "duration_seconds": 0.0305,
+    "duration_seconds": 0.0422,
     "details": {
-      "users": 6,
+      "users": 7,
       "chat_messages": 44,
-      "medical_reports": 14
+      "medical_reports": 15
     }
   },
   {
     "test": "Health API Endpoint (/health)",
     "status": "PASS",
-    "duration_seconds": 0.0008,
+    "duration_seconds": 0.0013,
     "details": {
       "database": "connected",
       "database_name": "multiagent_db",
@@ -23,16 +23,16 @@
   {
     "test": "User Registration API (/api/auth/register)",
     "status": "PASS",
-    "duration_seconds": 0.1183,
+    "duration_seconds": 0.1169,
     "details": {
       "status_code": 201,
-      "email": "test_integration_948013@example.com"
+      "email": "test_integration_ce1c81@example.com"
     }
   },
   {
     "test": "User Login & JWT Issuance (/api/auth/login)",
     "status": "PASS",
-    "duration_seconds": 0.097,
+    "duration_seconds": 0.0966,
     "details": {
       "status_code": 200,
       "token_issued": true
@@ -41,15 +41,15 @@
   {
     "test": "JWT Auth Protected Endpoint (/api/auth/me)",
     "status": "PASS",
-    "duration_seconds": 0.0025,
+    "duration_seconds": 0.0033,
     "details": {
-      "email": "test_integration_948013@example.com"
+      "email": "test_integration_ce1c81@example.com"
     }
   },
   {
     "test": "Google OAuth Client ID API (/api/auth/google/client-id)",
     "status": "PASS",
-    "duration_seconds": 0.0004,
+    "duration_seconds": 0.0003,
     "details": {
       "client_id_configured": true
     }
@@ -66,7 +66,7 @@
   {
     "test": "Multi-Agent Chat Pipeline (/api/chat)",
     "status": "PASS",
-    "duration_seconds": 0.04,
+    "duration_seconds": 0.0355,
     "details": {
       "response_length": 2348,
       "agents_invoked": [
@@ -81,7 +81,7 @@
   {
     "test": "Chat History Retrieval (/api/chat/history)",
     "status": "PASS",
-    "duration_seconds": 0.0041,
+    "duration_seconds": 0.0046,
     "details": {
       "messages_count": 2
     }
@@ -89,7 +89,7 @@
   {
     "test": "Chat Sessions Listing (/api/chat/sessions)",
     "status": "PASS",
-    "duration_seconds": 0.0022,
+    "duration_seconds": 0.0027,
     "details": {
       "sessions_count": 1
     }
@@ -97,17 +97,17 @@
   {
     "test": "Medical Report Upload & Summarization (/api/reports/upload)",
     "status": "PASS",
-    "duration_seconds": 0.1996,
+    "duration_seconds": 0.2894,
     "details": {
       "status_code": 200,
-      "report_id": "3c15c79e-e58e-4b05-8e46-f229dce3f8f2",
+      "report_id": "9da299b6-b3d2-4db7-a1e9-40da47bc1a7b",
       "abnormal_count": 1
     }
   },
   {
     "test": "Chat Session Deletion (/api/chat/session/<id>)",
     "status": "PASS",
-    "duration_seconds": 0.006,
+    "duration_seconds": 0.0086,
     "details": {
       "deleted_count": 4,
       "message": "Session deleted successfully"

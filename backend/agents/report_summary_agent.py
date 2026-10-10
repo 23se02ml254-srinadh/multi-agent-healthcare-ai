@@ -184,14 +184,17 @@ class ReportSummaryAgent(BaseAgent):
                 features['dimensions'] = f"{img.width}x{img.height}"
                 
                 thumb = img_rgb.resize((64, 64))
-                pixels = list(thumb.getdata())
+                pixels = [p for p in thumb.getdata()]
                 
                 total_pixels = len(pixels)
                 red_dominant = 0
                 skin_tones = 0
                 high_contrast_white = 0
                 
-                for r, g, b in pixels:
+                for pixel in pixels:
+                    if not isinstance(pixel, (tuple, list)) or len(pixel) < 3:
+                        continue
+                    r, g, b = pixel[0], pixel[1], pixel[2]
                     # Skin tone detection range
                     if r > 95 and g > 40 and b > 20 and max(r, g, b) - min(r, g, b) > 15 and abs(r - g) > 15 and r > g and r > b:
                         skin_tones += 1

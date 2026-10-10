@@ -140,15 +140,21 @@ def google_auth():
         except Exception as e:
             logger.error(f"Failed to exchange auth code with Google: {e}")
 
-    if not google_user_info or not google_user_info.get('email'):
+    if not google_user_info:
         return jsonify({'error': 'Invalid or unverified Google account information'}), 401
 
-    email = google_user_info['email'].strip().lower()
-    sub = google_user_info.get('sub')
-    picture = google_user_info.get('picture')
-    first_name = google_user_info.get('first_name') or ''
-    last_name = google_user_info.get('last_name') or ''
-    name = google_user_info.get('name') or ''
+    raw_email = google_user_info.get('email')
+    if not isinstance(raw_email, str) or not raw_email.strip():
+        return jsonify({'error': 'Invalid or unverified Google account information'}), 401
+
+    email = raw_email.strip().lower()
+    sub_val = google_user_info.get('sub')
+    sub = str(sub_val) if sub_val is not None else None
+    pic_val = google_user_info.get('picture')
+    picture = str(pic_val) if pic_val is not None else None
+    first_name = str(google_user_info.get('first_name') or '')
+    last_name = str(google_user_info.get('last_name') or '')
+    name = str(google_user_info.get('name') or '')
 
     if not first_name and name:
         parts = name.split(' ')
@@ -164,10 +170,10 @@ def google_auth():
 
             changed = False
             if hasattr(user, 'google_id') and not user.google_id and sub:
-                user.google_id = sub
+                setattr(user, 'google_id', sub)
                 changed = True
             if hasattr(user, 'avatar_url') and not user.avatar_url and picture:
-                user.avatar_url = picture
+                setattr(user, 'avatar_url', picture)
                 changed = True
             if not user.first_name and first_name:
                 user.first_name = first_name
@@ -201,14 +207,11 @@ def google_auth():
                 password_hash=random_hash,
                 first_name=first_name,
                 last_name=last_name,
+                google_id=sub,
+                avatar_url=picture,
+                auth_provider='google',
                 is_active=True
             )
-            if hasattr(user, 'google_id'):
-                user.google_id = sub
-            if hasattr(user, 'avatar_url'):
-                user.avatar_url = picture
-            if hasattr(user, 'auth_provider'):
-                user.auth_provider = 'google'
 
             db.session.add(user)
             db.session.commit()

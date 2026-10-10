@@ -3,7 +3,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from database.db import db
 from database.models import ChatSession, ChatMessage, SymptomAnalysis, DiseasePrediction, Explanation, Recommendation
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 bp = Blueprint('chat', __name__)
 
@@ -41,8 +41,8 @@ def create_session():
         user_id=user_id,
         title=title,
         preview_text='Start a new conversation...',
-        created_at=datetime.utcnow(),
-        updated_at=datetime.utcnow()
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc)
     )
     
     db.session.add(session)
@@ -85,7 +85,7 @@ def toggle_pin(session_id):
         return jsonify({'error': 'Session not found'}), 404
     
     session.is_pinned = data.get('is_pinned', False)
-    session.updated_at = datetime.utcnow()
+    session.updated_at = datetime.now(timezone.utc)
     db.session.commit()
     
     return jsonify(session.to_dict()), 200
@@ -107,7 +107,7 @@ def rename_session(session_id):
     
     new_title = data.get('title', 'New Conversation')
     session.title = new_title
-    session.updated_at = datetime.utcnow()
+    session.updated_at = datetime.now(timezone.utc)
     db.session.commit()
     
     return jsonify(session.to_dict()), 200
@@ -156,8 +156,8 @@ def send_message():
             user_id=user_id,
             title=message[:30] + '...' if len(message) > 30 else message,
             preview_text=message[:50],
-            created_at=datetime.utcnow(),
-            updated_at=datetime.utcnow()
+            created_at=datetime.now(timezone.utc),
+            updated_at=datetime.now(timezone.utc)
         )
         db.session.add(session)
         db.session.commit()
@@ -176,7 +176,7 @@ def send_message():
         session_id=session_id,
         role='user',
         content=message,
-        created_at=datetime.utcnow()
+        created_at=datetime.now(timezone.utc)
     )
     db.session.add(user_msg)
     
@@ -190,15 +190,15 @@ def send_message():
         role='assistant',
         content=response,
         agent_type='Coordinator',
-        created_at=datetime.utcnow()
+        created_at=datetime.now(timezone.utc)
     )
     db.session.add(assistant_msg)
     
     # Update session
     session.message_count += 1
     session.preview_text = message[:50]
-    session.last_message_at = datetime.utcnow()
-    session.updated_at = datetime.utcnow()
+    session.last_message_at = datetime.now(timezone.utc)
+    session.updated_at = datetime.now(timezone.utc)
     db.session.commit()
     
     return jsonify({
@@ -239,7 +239,7 @@ def analyze_symptoms():
         raw_text=text,
         extracted_symptoms=symptoms,
         severity_score=calculate_severity(symptoms),
-        created_at=datetime.utcnow()
+        created_at=datetime.now(timezone.utc)
     )
     db.session.add(symptom_analysis)
     db.session.commit()
@@ -290,7 +290,7 @@ def predict_disease():
         severity='medium',
         urgency_level='medium',
         suggested_specialist='General Physician',
-        created_at=datetime.utcnow()
+        created_at=datetime.now(timezone.utc)
     )
     db.session.add(prediction)
     db.session.commit()
