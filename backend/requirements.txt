@@ -8,4 +8,5 @@ python-dotenv==1.0.0
 PyMuPDF==1.26.7
 requests==2.31.0
 google-auth>=2.20.0
-gunicorn==23.0.0
+gunicorn==23.0.0S
+psycopg[binary]>=3.2,<4
