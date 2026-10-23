@@ -1226,7 +1226,8 @@
             const oauthUser = urlParams.get('user');
             if (oauthUser) {
                 try {
-                    const parsedUser = JSON.parse(atob(oauthUser));
+                    const normalized = oauthUser.replace(/-/g, '+').replace(/_/g, '/');
+                    const parsedUser = JSON.parse(atob(normalized));
                     localStorage.setItem('user', JSON.stringify(parsedUser));
                 } catch (e) {
                     console.warn('Could not parse oauth user payload:', e);
@@ -2019,7 +2020,7 @@
 
             } catch (error) {
                 removeLoadingMessage();
-                addMessage('❌ Error: Unable to connect to the server.', 'assistant');
+                addMessage(`❌ Error: ${error.message || 'Unable to connect to the server.'}`, 'assistant');
                 console.error('Error:', error);
             }
         }

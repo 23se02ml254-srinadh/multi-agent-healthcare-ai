@@ -69,12 +69,23 @@ with app.app_context():
                     ALTER TABLE users ADD COLUMN auth_provider VARCHAR(50) DEFAULT 'local';
                 END IF;
                 ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL;
+
+                -- Ensure chat_messages columns exist
+                IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='chat_messages' AND column_name='agent_type') THEN
+                    ALTER TABLE chat_messages ADD COLUMN agent_type VARCHAR(50);
+                END IF;
+                IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='chat_messages' AND column_name='agent_responses') THEN
+                    ALTER TABLE chat_messages ADD COLUMN agent_responses JSONB DEFAULT '{}'::jsonb;
+                END IF;
+                IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='chat_messages' AND column_name='merged_response') THEN
+                    ALTER TABLE chat_messages ADD COLUMN merged_response TEXT;
+                END IF;
             END $$;
         """))
         db.session.commit()
     except Exception as e:
         db.session.rollback()
-        logger.warning(f"OAuth columns verification notice: {e}")
+        logger.warning(f"Database schema verification notice: {e}")
     print("[OK] Database tables created and verified successfully")
 
 @app.route('/health')
@@ -345,6 +356,16 @@ def google_auth():
         logger.error(f"Database error during Google auth: {db_e}", exc_info=True)
         return jsonify({'error': 'A database error occurred during authentication'}), 500
 
+def get_google_callback_uri():
+    """Dynamically determine Google OAuth callback URL based on current request host and scheme"""
+    is_https = request.is_secure or request.headers.get('X-Forwarded-Proto') == 'https'
+    scheme = 'https' if is_https else request.scheme
+    current_host_callback = f"{scheme}://{request.host}/api/auth/google/callback"
+    env_redirect = os.getenv('GOOGLE_REDIRECT_URI')
+    if env_redirect and not ('localhost' in env_redirect and 'localhost' not in request.host):
+        return env_redirect
+    return current_host_callback
+
 @app.route('/api/auth/google/login', methods=['GET'])
 def google_oauth_login_redirect():
     """Generates and redirects directly to Google OAuth 2.0 consent page"""
@@ -352,8 +373,10 @@ def google_oauth_login_redirect():
     if not client_id:
         return jsonify({'error': 'GOOGLE_CLIENT_ID not configured in backend'}), 400
 
-    frontend_redirect = request.args.get('frontend', 'http://localhost:5500/dashboard.html')
-    backend_callback = request.args.get('redirect_uri') or app.config.get('GOOGLE_REDIRECT_URI') or f"{request.host_url.rstrip('/')}/api/auth/google/callback"
+    is_https = request.is_secure or request.headers.get('X-Forwarded-Proto') == 'https'
+    scheme = 'https' if is_https else request.scheme
+    frontend_redirect = request.args.get('frontend') or f"{scheme}://{request.host}/dashboard.html"
+    backend_callback = request.args.get('redirect_uri') or get_google_callback_uri()
     
     state_data = json.dumps({'frontend': frontend_redirect, 'callback': backend_callback})
     state_encoded = base64.urlsafe_b64encode(state_data.encode()).decode()
@@ -377,8 +400,10 @@ def google_oauth_callback():
     error = request.args.get('error')
     state = request.args.get('state')
 
-    frontend_dest = 'http://localhost:5500/dashboard.html'
-    backend_callback = app.config.get('GOOGLE_REDIRECT_URI') or f"{request.host_url.rstrip('/')}/api/auth/google/callback"
+    is_https = request.is_secure or request.headers.get('X-Forwarded-Proto') == 'https'
+    scheme = 'https' if is_https else request.scheme
+    frontend_dest = f"{scheme}://{request.host}/dashboard.html"
+    backend_callback = get_google_callback_uri()
     
     if state:
         try:
@@ -609,26 +634,30 @@ def chat():
         response = f"I'm sorry, I encountered an internal error while processing your request: {str(e)}"
         agent_results = {}
         
-    chat = ChatMessage(
-        id=uuid.uuid4(),
-        user_id=user_id,
-        session_id=session_id,
-        role='user',
-        content=message
-    )
-    db.session.add(chat)
-    
-    chat_response = ChatMessage(
-        id=uuid.uuid4(),
-        user_id=user_id,
-        session_id=session_id,
-        role='assistant',
-        content=response,
-        agent_responses=agent_results,
-        merged_response=response
-    )
-    db.session.add(chat_response)
-    db.session.commit()
+    try:
+        chat = ChatMessage(
+            id=uuid.uuid4(),
+            user_id=user_id,
+            session_id=session_id,
+            role='user',
+            content=message
+        )
+        db.session.add(chat)
+        
+        chat_response = ChatMessage(
+            id=uuid.uuid4(),
+            user_id=user_id,
+            session_id=session_id,
+            role='assistant',
+            content=response,
+            agent_responses=agent_results,
+            merged_response=response
+        )
+        db.session.add(chat_response)
+        db.session.commit()
+    except Exception as db_err:
+        db.session.rollback()
+        logger.error(f"Error persisting chat message to database: {db_err}")
     
     return jsonify({
         'response': response,
