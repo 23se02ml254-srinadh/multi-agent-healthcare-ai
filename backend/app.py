@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, redirect
+from flask import Flask, jsonify, request, redirect, send_from_directory
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -20,8 +20,16 @@ from sqlalchemy import text
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Create Flask app
-app = Flask(__name__)
+# Locate frontend directory (supports both repo root and backend/ subfolder executions)
+candidate_dirs = [
+    os.path.abspath(os.path.join(os.path.dirname(__file__), 'frontend')),
+    os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frontend')),
+    os.path.abspath('frontend')
+]
+frontend_dir = next((d for d in candidate_dirs if os.path.isdir(d)), candidate_dirs[1])
+
+# Create Flask app with frontend static assets enabled
+app = Flask(__name__, static_folder=frontend_dir, static_url_path='')
 
 # Initialize Multi-Agent Coordinator
 coordinator = CoordinatorAgent()
@@ -80,6 +88,22 @@ def health():
 
 @app.route('/')
 def index():
+    return send_from_directory(frontend_dir, 'index.html')
+
+@app.route('/login')
+def login_page():
+    return send_from_directory(frontend_dir, 'login.html')
+
+@app.route('/register')
+def register_page():
+    return send_from_directory(frontend_dir, 'register.html')
+
+@app.route('/dashboard')
+def dashboard_page():
+    return send_from_directory(frontend_dir, 'dashboard.html')
+
+@app.route('/api')
+def api_status():
     return jsonify({
         'name': 'Multi-Agent AI Healthcare Assistant',
         'version': '1.0.0',
@@ -95,6 +119,15 @@ def index():
             'chat': '/api/chat'
         }
     })
+
+@app.route('/<path:filename>')
+def serve_static(filename):
+    if filename.startswith('api/') or filename == 'api':
+        return jsonify({'error': 'Not found'}), 404
+    file_path = os.path.join(frontend_dir, filename)
+    if os.path.isfile(file_path):
+        return send_from_directory(frontend_dir, filename)
+    return send_from_directory(frontend_dir, 'index.html')
 
 @app.route('/api/auth/google/client-id', methods=['GET'])
 def get_google_client_id():

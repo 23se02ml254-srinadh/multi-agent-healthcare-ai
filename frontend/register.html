@@ -537,7 +537,7 @@
                 username: email.split('@')[0]
             };
             
-            const API_BASE_URL = 'http://localhost:5000';
+            const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && (window.location.port === '5500' || window.location.port === '3000' || window.location.protocol === 'file:') ? 'http://localhost:5000' : '';
             const submitBtn = document.getElementById('regSubmitBtn');
             const origHtml = submitBtn.innerHTML;
 
@@ -571,7 +571,7 @@
         /* ==============================
            GOOGLE SIGN-UP (FULL DIRECT OAUTH FLOW)
            ============================== */
-        const API_BASE_URL = 'http://localhost:5000';
+        const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && (window.location.port === '5500' || window.location.port === '3000' || window.location.protocol === 'file:') ? 'http://localhost:5000' : '';
 
         const regUrlParams = new URLSearchParams(window.location.search);
         const regQueryError = regUrlParams.get('error');

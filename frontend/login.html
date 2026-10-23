@@ -604,7 +604,7 @@
                 return;
             }
 
-            const API_BASE_URL = 'http://localhost:5000';
+            const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && (window.location.port === '5500' || window.location.port === '3000' || window.location.protocol === 'file:') ? 'http://localhost:5000' : '';
 
             const loginBtn = document.getElementById('loginBtn');
             const btnText = document.getElementById('btnText');
@@ -669,7 +669,7 @@
         /* ==============================
            GOOGLE SIGN-IN (FULL DIRECT OAUTH FLOW)
            ============================== */
-        const API_BASE_URL = 'http://localhost:5000';
+        const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && (window.location.port === '5500' || window.location.port === '3000' || window.location.protocol === 'file:') ? 'http://localhost:5000' : '';
 
         // Check for error in query string
         const urlParams = new URLSearchParams(window.location.search);

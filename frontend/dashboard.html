@@ -1241,10 +1241,12 @@
         let currentSessionId = null;
         let renameSessionId = null;
 
+        const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && (window.location.port === '5500' || window.location.port === '3000' || window.location.protocol === 'file:') ? 'http://localhost:5000' : '';
+
         // ========== User Data ==========
         async function loadUser() {
             try {
-                const response = await fetch('http://localhost:5000/api/auth/me', {
+                const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const user = await response.json();
@@ -1273,7 +1275,7 @@
         async function loadChatSessions(activeSessionId = null) {
             try {
                 const targetSessionId = activeSessionId || currentSessionId;
-                const response = await fetch('http://localhost:5000/api/chat/sessions', {
+                const response = await fetch(`${API_BASE_URL}/api/chat/sessions`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (!response.ok) throw new Error('Failed to load sessions');
@@ -1465,7 +1467,7 @@
             }
 
             try {
-                const response = await fetch(`http://localhost:5000/api/chat/session/${encodeURIComponent(sessionId)}`, {
+                const response = await fetch(`${API_BASE_URL}/api/chat/session/${encodeURIComponent(sessionId)}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${currentToken}` }
                 });
@@ -1527,7 +1529,7 @@
             addLoadingMessage();
 
             try {
-                const response = await fetch(`http://localhost:5000/api/chat/history?session_id=${sessionId}`, {
+                const response = await fetch(`${API_BASE_URL}/api/chat/history?session_id=${sessionId}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (!response.ok) throw new Error('Failed to load chat history');
@@ -1904,7 +1906,7 @@
                         formData.append('session_id', currentSessionId);
                     }
 
-                    const response = await fetch('http://localhost:5000/api/reports/upload', {
+                    const response = await fetch(`${API_BASE_URL}/api/reports/upload`, {
                         method: 'POST',
                         headers: {
                             'Authorization': `Bearer ${token}`
@@ -1969,7 +1971,7 @@
                     payload.session_id = currentSessionId;
                 }
 
-                const response = await fetch('http://localhost:5000/api/chat', {
+                const response = await fetch(`${API_BASE_URL}/api/chat`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

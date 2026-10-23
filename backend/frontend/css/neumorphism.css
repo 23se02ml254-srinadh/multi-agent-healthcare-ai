@@ -1,0 +1,189 @@
+/* ============================================
+   NEUMORPHISM COMPATIBILITY LAYER
+   Mapped to the Dark Cyber-Teal Design System
+   ============================================ */
+
+:root {
+    --bg-primary: #020b14;
+    --bg-secondary: #030d17;
+    --shadow-light: rgba(0, 0, 0, 0.15);
+    --shadow-dark: rgba(0, 0, 0, 0.65);
+    --primary: #25d5c5;
+    --primary-dark: #3299c7;
+    --text-primary: #ffffff;
+    --text-secondary: #c8d0d7;
+    --text-muted: #84909c;
+    --border-color: #2d4255;
+    --radius: 16px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Base resets & mapping legacy classes to glassmorphism */
+
+.neumorphic {
+    background: var(--bg-secondary);
+    border-radius: var(--radius);
+    border: 1px solid rgba(37, 213, 197, 0.28);
+    box-shadow:
+        0 0 14px rgba(37, 213, 197, 0.10),
+        0 8px 16px rgba(0, 0, 0, 0.4);
+    transition: var(--transition);
+}
+
+.neumorphic:hover {
+    border-color: rgba(37, 213, 197, 0.5);
+    box-shadow:
+        0 0 22px rgba(37, 213, 197, 0.18),
+        0 12px 24px rgba(0, 0, 0, 0.5);
+}
+
+.neumorphic-inset {
+    background: rgba(18, 28, 39, 0.85);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+}
+
+.neumorphic-inset-light {
+    background: rgba(18, 28, 39, 0.85);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+}
+
+.neumorphic-card {
+    background: rgba(3, 13, 23, 0.85);
+    border: 1px solid rgba(53, 255, 239, 0.15);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow:
+        0 0 10px rgba(35, 255, 239, 0.05),
+        0 20px 45px rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(16px);
+    transition: var(--transition);
+}
+
+.neumorphic-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(53, 255, 239, 0.3);
+    box-shadow:
+        0 0 20px rgba(35, 255, 239, 0.15),
+        0 25px 50px rgba(0, 0, 0, 0.6);
+}
+
+/* Map legacy button styles to the cyber-teal design */
+
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 28px;
+    border: none;
+    background: linear-gradient(90deg, #3299c7, #25d5c5);
+    border-radius: var(--radius);
+    font-weight: 700;
+    font-size: 14px;
+    color: white;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: 0 10px 25px rgba(28, 210, 197, 0.2);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 35px rgba(28, 210, 197, 0.35);
+}
+
+.btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 28px;
+    border: 1px solid var(--border-color);
+    background: rgba(15, 27, 38, 0.85);
+    border-radius: var(--radius);
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-secondary:hover {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0, 224, 209, 0.1);
+}
+
+/* Map input styles */
+
+.input-field {
+    width: 100%;
+    padding: 14px 18px;
+    border: 1px solid var(--border-color);
+    background: rgba(18, 28, 39, 0.85);
+    border-radius: var(--radius);
+    font-size: 14px;
+    color: white;
+    transition: var(--transition);
+    outline: none;
+}
+
+.input-field:focus {
+    border-color: var(--primary);
+    box-shadow:
+        0 0 0 3px rgba(37, 213, 197, 0.08),
+        0 0 18px rgba(37, 213, 197, 0.15);
+}
+
+.input-field::placeholder {
+    color: var(--text-muted);
+}
+
+/* Map message styling */
+
+.message-user {
+    background: linear-gradient(90deg, #3299c7, #25d5c5);
+    color: white;
+    padding: 12px 18px;
+    border-radius: var(--radius) var(--radius) 0 var(--radius);
+    max-width: 80%;
+    align-self: flex-end;
+}
+
+.message-assistant {
+    background: rgba(3, 13, 23, 0.85);
+    border: 1px solid rgba(53, 255, 239, 0.15);
+    color: var(--text-primary);
+    padding: 12px 18px;
+    border-radius: var(--radius) var(--radius) var(--radius) 0;
+    max-width: 80%;
+    align-self: flex-start;
+    box-shadow:
+        0 0 10px rgba(35, 255, 239, 0.05),
+        0 8px 16px rgba(0, 0, 0, 0.4);
+}
+
+/* Scrollbar customization */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 10px;
+}
+
+/* Legacy Dark Mode Mapping */
+:root.dark {
+    --bg-primary: #020b14;
+    --bg-secondary: #030d17;
+    --text-primary: #ffffff;
+    --text-secondary: #c8d0d7;
+    --border-color: #273744;
+}

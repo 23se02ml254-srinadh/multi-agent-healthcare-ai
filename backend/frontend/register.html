@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - HealthAI</title>
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/neumorphism.css">
+    <link rel="stylesheet" href="css/style.css">
+
+    <style>
+        /* Page specific styling overrides */
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper .input-icon {
+            position: absolute;
+            left: 22px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--accent);
+            font-size: 18px;
+            transition: color 0.3s ease;
+        }
+
+        .input-field {
+            padding-left: 56px;
+            padding-right: 56px;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            color: #a8b2bc;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 4px;
+            transition: color 0.3s ease;
+        }
+
+        .password-toggle:hover {
+            color: var(--accent);
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin: 28px 0 20px;
+            color: #a7b0ba;
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(to right, transparent, #273744);
+        }
+
+        .divider::after {
+            background: linear-gradient(to left, transparent, #273744);
+        }
+
+        /* Custom Google OAuth Button */
+        .btn-google-auth {
+            position: relative;
+            width: 100%;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(22, 34, 47, 0.95), rgba(15, 24, 34, 0.95));
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+            cursor: pointer;
+            overflow: hidden;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-google-auth:hover {
+            border-color: var(--accent);
+            background: linear-gradient(135deg, rgba(28, 44, 60, 0.98), rgba(18, 30, 42, 0.98));
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), 0 0 24px rgba(53, 229, 220, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-google-auth:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .google-icon-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 11px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-google-auth:hover .google-icon-box {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(1.05);
+        }
+
+        .toast-notification {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            padding: 16px 24px;
+            border-radius: 14px;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            max-width: 420px;
+            animation: toastSlideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .toast-notification.success {
+            border-color: rgba(53, 229, 220, 0.2);
+            background: rgba(53, 229, 220, 0.08);
+        }
+
+        .toast-notification.error {
+            border-color: rgba(255, 70, 70, 0.2);
+            background: rgba(255, 70, 70, 0.08);
+        }
+
+        @keyframes toastSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(40px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+            }
+        }
+
+        .toast-notification .toast-close {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.4);
+            cursor: pointer;
+            font-size: 16px;
+            padding: 4px;
+        }
+
+        .toast-close:hover {
+            color: #ffffff;
+        }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 24px;
+            color: #c8d0d7;
+            font-size: 16px;
+        }
+
+        .auth-footer a {
+            color: var(--accent);
+            font-weight: 600;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .auth-footer a:hover {
+            color: var(--accent-hover);
+            text-decoration: underline;
+        }
+
+        .heart-line::before,
+        .heart-line::after {
+            content: "";
+            width: 70px;
+            height: 1px;
+            background: linear-gradient(to right, transparent, var(--accent));
+        }
+
+        .heart-line::after {
+            background: linear-gradient(to left, transparent, var(--accent));
+        }
+
+        .heart-line i {
+            animation: heartPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes heartPulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.25);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .login-section {
+                padding: 40px 24px;
+            }
+
+            .auth-title {
+                font-size: 34px;
+            }
+
+            .input-field {
+                height: 56px;
+                padding-left: 48px;
+                padding-right: 48px;
+            }
+
+            .input-wrapper .input-icon {
+                left: 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="auth-page">
+
+        <div class="auth-container">
+
+            <!-- ================= LEFT REGISTER SECTION ================= -->
+            <div class="login-section">
+
+                <!-- Brand -->
+                <div class="brand">
+                    <div class="brand-icon">
+                        <i class="fa-solid fa-heart-pulse"></i>
+                    </div>
+                    <div>
+                        <div class="brand-name">
+                            Health<span>AI</span>
+                        </div>
+                        <div class="brand-tagline">
+                            Your Health, Our Priority
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Welcome Text -->
+                <div class="welcome-text" style="color: var(--accent); font-size: 18px; font-weight: 600; margin-bottom: 6px; letter-spacing: 0.5px;">
+                    Get Started
+                </div>
+
+                <h1 class="auth-title" style="font-size: 48px; font-weight: 800; margin-bottom: 8px; letter-spacing: -1px;">
+                    Register
+                </h1>
+
+                <p class="auth-subtitle" style="color: #aeb8c2; font-size: 16px; margin-bottom: 30px; font-weight: 400;">
+                    Create a new account to experience AI healthcare
+                </p>
+
+                <!-- Register Form -->
+                <form class="auth-form" id="registerForm" style="max-width: 550px;">
+
+                    <!-- Full Name -->
+                    <div class="form-group" style="margin-bottom: 18px;">
+                        <label for="fullName" style="display: block; margin-bottom: 8px; font-size: 15px; font-weight: 600; color: #e7edf2;">
+                            Full Name
+                        </label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-user input-icon"></i>
+                            <input
+                                type="text"
+                                id="fullName"
+                                class="input-field"
+                                placeholder="Enter your full name"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Email Address -->
+                    <div class="form-group" style="margin-bottom: 18px;">
+                        <label for="email" style="display: block; margin-bottom: 8px; font-size: 15px; font-weight: 600; color: #e7edf2;">
+                            Email Address
+                        </label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-envelope input-icon"></i>
+                            <input
+                                type="email"
+                                id="email"
+                                class="input-field"
+                                placeholder="Enter your email address"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Password -->
+                    <div class="form-group" style="margin-bottom: 18px;">
+                        <label for="password" style="display: block; margin-bottom: 8px; font-size: 15px; font-weight: 600; color: #e7edf2;">
+                            Password
+                        </label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-lock input-icon"></i>
+                            <input
+                                type="password"
+                                id="password"
+                                class="input-field"
+                                placeholder="Enter your password (min. 6 characters)"
+                                required
+                            >
+                            <button
+                                type="button"
+                                class="password-toggle"
+                                id="togglePassword"
+                                aria-label="Toggle password visibility"
+                            >
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Confirm Password -->
+                    <div class="form-group" style="margin-bottom: 24px;">
+                        <label for="confirmPassword" style="display: block; margin-bottom: 8px; font-size: 15px; font-weight: 600; color: #e7edf2;">
+                            Confirm Password
+                        </label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-shield-halved input-icon"></i>
+                            <input
+                                type="password"
+                                id="confirmPassword"
+                                class="input-field"
+                                placeholder="Confirm your password"
+                                required
+                            >
+                            <button
+                                type="button"
+                                class="password-toggle"
+                                id="toggleConfirmPassword"
+                                aria-label="Toggle confirm password visibility"
+                            >
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Register Button -->
+                    <button
+                        type="submit"
+                        class="btn-primary"
+                        id="regSubmitBtn"
+                        style="width: 100%; height: 58px; border-radius: 16px; font-size: 17px;"
+                    >
+                        <span>Create Account</span>
+                    </button>
+
+                    <!-- Divider -->
+                    <div class="divider">
+                        OR
+                    </div>
+
+                    <!-- Attractive Google Sign-Up Button -->
+                    <div class="social-login" style="display: flex; justify-content: center; width: 100%;">
+                        <button
+                            type="button"
+                            id="googleRegisterBtn"
+                            class="btn-google-auth"
+                            onclick="handleGoogleSignUp()"
+                        >
+                            <div class="google-icon-box">
+                                <svg viewBox="0 0 24 24" width="22" height="22">
+                                    <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
+                                    <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
+                                    <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.14-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.98 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+                                    <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+                                </svg>
+                            </div>
+                            <span id="googleRegBtnText">Continue with Google</span>
+                        </button>
+                    </div>
+
+                    <!-- Sign In Link -->
+                    <div class="auth-footer">
+                        <p>
+                            Already have an account?
+                            <a href="login.html">
+                                Sign In
+                            </a>
+                        </p>
+                    </div>
+
+                </form>
+
+            </div>
+
+            <!-- ================= RIGHT WELCOME SECTION ================= -->
+            <div class="welcome-section">
+
+                <div class="welcome-content" style="position: relative; z-index: 3; max-width: 480px; margin-left: 80px;">
+
+                    <h2 class="welcome-heading">
+                        JOIN
+                        <span>
+                            US!
+                        </span>
+                    </h2>
+
+                    <div class="heart-line">
+                        <i class="fa-regular fa-heart"></i>
+                    </div>
+
+                    <p class="welcome-message">
+                        Start your personalized<br>
+                        AI healthcare journey<br>
+                        <span>
+                            with HealthAI today!
+                        </span>
+                    </p>
+
+                    <div class="welcome-illustration-container">
+                        <img src="images/welcome-illustration.png" alt="HealthAI Shield and Stethoscope">
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        /* ==============================
+           PASSWORD TOGGLES
+           ============================== */
+        function setupToggle(buttonId, inputId) {
+            const btn = document.getElementById(buttonId);
+            const input = document.getElementById(inputId);
+            if (!btn || !input) return;
+            let visible = false;
+            btn.addEventListener('click', function() {
+                visible = !visible;
+                input.type = visible ? 'text' : 'password';
+                this.innerHTML = visible ? '<i class="fa-solid fa-eye-slash"></i>' : '<i class="fa-solid fa-eye"></i>';
+            });
+        }
+        setupToggle('togglePassword', 'password');
+        setupToggle('toggleConfirmPassword', 'confirmPassword');
+
+        /* ==============================
+           TOAST NOTIFICATION
+           ============================== */
+        function showToast(message, type = 'error') {
+            const existingToast = document.querySelector('.toast-notification');
+            if (existingToast) existingToast.remove();
+
+            const toast = document.createElement('div');
+            toast.className = `toast-notification ${type}`;
+            toast.innerHTML = `
+                <i class="fa-solid ${type === 'success' ? 'fa-check-circle' : type === 'info' ? 'fa-info-circle' : 'fa-circle-exclamation'}"></i>
+                <span>${message}</span>
+                <button class="toast-close">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            `;
+            document.body.appendChild(toast);
+
+            toast.querySelector('.toast-close').addEventListener('click', function() {
+                toast.remove();
+            });
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(30px)';
+                toast.style.transition = 'all 0.4s ease';
+                setTimeout(() => toast.remove(), 400);
+            }, 5000);
+        }
+
+        /* ==============================
+           EMAIL / PASSWORD REGISTRATION
+           ============================== */
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (password !== confirmPassword) {
+                showToast('Passwords do not match', 'error');
+                return;
+            }
+
+            if (password.length < 6) {
+                showToast('Password must be at least 6 characters long', 'error');
+                return;
+            }
+            
+            const fullName = document.getElementById('fullName').value.trim().split(' ');
+            const email = document.getElementById('email').value.trim();
+            const data = {
+                email: email,
+                password: password,
+                first_name: fullName[0] || '',
+                last_name: fullName.slice(1).join(' ') || '',
+                username: email.split('@')[0]
+            };
+            
+            const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && (window.location.port === '5500' || window.location.port === '3000' || window.location.protocol === 'file:') ? 'http://localhost:5000' : '';
+            const submitBtn = document.getElementById('regSubmitBtn');
+            const origHtml = submitBtn.innerHTML;
+
+            try {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span><i class="fa-solid fa-spinner fa-spin"></i> Creating account...</span>';
+
+                const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showToast('Registration successful! Redirecting to login...', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 1200);
+                } else {
+                    showToast(result.error || result.detail || 'Registration failed', 'error');
+                }
+            } catch (error) {
+                showToast('Network error. Please try again.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = origHtml;
+            }
+        });
+
+        /* ==============================
+           GOOGLE SIGN-UP (FULL DIRECT OAUTH FLOW)
+           ============================== */
+        const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && (window.location.port === '5500' || window.location.port === '3000' || window.location.protocol === 'file:') ? 'http://localhost:5000' : '';
+
+        const regUrlParams = new URLSearchParams(window.location.search);
+        const regQueryError = regUrlParams.get('error');
+        if (regQueryError) {
+            showToast('Google authentication failed: ' + decodeURIComponent(regQueryError), 'error');
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+
+        function handleGoogleSignUp() {
+            const btn = document.getElementById('googleRegisterBtn');
+            const btnText = document.getElementById('googleRegBtnText');
+
+            if (btn) btn.style.pointerEvents = 'none';
+            if (btnText) btnText.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Connecting to Google...';
+
+            const frontendDest = window.location.href.replace(/register\.html.*/, 'dashboard.html');
+            window.location.href = `${API_BASE_URL}/api/auth/google/login?frontend=${encodeURIComponent(frontendDest)}`;
+        }
+
+        console.log('HealthAI Register Page initialized');
+    </script>
+</body>
+
+</html>

@@ -1,5 +1,5 @@
 // frontend/js/api.js
-const API_URL = 'http://localhost:5000';
+const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && (window.location.port === '5500' || window.location.port === '3000' || window.location.protocol === 'file:') ? 'http://localhost:5000' : '';
 
 export const API = {
     // Auth endpoints

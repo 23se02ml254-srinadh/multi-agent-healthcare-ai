@@ -41,6 +41,7 @@ def create_session():
         user_id=user_id,
         title=title,
         preview_text='Start a new conversation...',
+        message_count=0,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
     )
@@ -84,8 +85,8 @@ def toggle_pin(session_id):
     if not session:
         return jsonify({'error': 'Session not found'}), 404
     
-    session.is_pinned = data.get('is_pinned', False)
-    session.updated_at = datetime.now(timezone.utc)
+    setattr(session, 'is_pinned', data.get('is_pinned', False))
+    setattr(session, 'updated_at', datetime.now(timezone.utc))
     db.session.commit()
     
     return jsonify(session.to_dict()), 200
@@ -106,8 +107,8 @@ def rename_session(session_id):
         return jsonify({'error': 'Session not found'}), 404
     
     new_title = data.get('title', 'New Conversation')
-    session.title = new_title
-    session.updated_at = datetime.now(timezone.utc)
+    setattr(session, 'title', new_title)
+    setattr(session, 'updated_at', datetime.now(timezone.utc))
     db.session.commit()
     
     return jsonify(session.to_dict()), 200
@@ -156,6 +157,7 @@ def send_message():
             user_id=user_id,
             title=message[:30] + '...' if len(message) > 30 else message,
             preview_text=message[:50],
+            message_count=0,
             created_at=datetime.now(timezone.utc),
             updated_at=datetime.now(timezone.utc)
         )
@@ -195,10 +197,10 @@ def send_message():
     db.session.add(assistant_msg)
     
     # Update session
-    session.message_count += 1
-    session.preview_text = message[:50]
-    session.last_message_at = datetime.now(timezone.utc)
-    session.updated_at = datetime.now(timezone.utc)
+    setattr(session, 'message_count', (getattr(session, 'message_count', 0) or 0) + 1)
+    setattr(session, 'preview_text', message[:50])
+    setattr(session, 'last_message_at', datetime.now(timezone.utc))
+    setattr(session, 'updated_at', datetime.now(timezone.utc))
     db.session.commit()
     
     return jsonify({
