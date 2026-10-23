@@ -16,6 +16,7 @@ import secrets
 import urllib.parse
 import requests
 from sqlalchemy import text
+from flask import send_from_directory
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -80,21 +81,10 @@ def health():
 
 @app.route('/')
 def index():
-    return jsonify({
-        'name': 'Multi-Agent AI Healthcare Assistant',
-        'version': '1.0.0',
-        'status': 'operational',
-        'database': 'multiagent_db',
-        'endpoints': {
-            'health': '/health',
-            'register': '/api/auth/register',
-            'login': '/api/auth/login',
-            'google': '/api/auth/google',
-            'google_client_id': '/api/auth/google/client-id',
-            'me': '/api/auth/me',
-            'chat': '/api/chat'
-        }
-    })
+    frontend_dir = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), '..', 'frontend')
+    )
+    return send_from_directory(frontend_dir, 'index.html')
 
 @app.route('/api/auth/google/client-id', methods=['GET'])
 def get_google_client_id():
